@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - wordpress-deployment.yaml
   - wordpress-service.yaml
-  # - wordpress-pvc.yaml
-  # - wordpress-pv.yaml
+  - pvc-wordpress.yaml
+  - pv-wordpress.yaml
   - secret_app_wp.yaml
   - namespace_app.yaml
