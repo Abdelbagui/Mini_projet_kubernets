@@ -1,6 +1,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: wordpress
-status:
-  phase: Active
+  name: web-stack

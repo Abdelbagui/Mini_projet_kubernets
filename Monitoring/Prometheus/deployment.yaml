@@ -1,8 +1,9 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: monitoring
+  namespace: web-stack
 spec:
   replicas: 1
   selector:
@@ -23,13 +24,13 @@ spec:
         volumeMounts:
         - name: prometheus-storage
           mountPath: /prometheus
-        - name: config-volume
+        - name: prometheus-config
           mountPath: /etc/prometheus/prometheus.yml
           subPath: prometheus.yml
       volumes:
       - name: prometheus-storage
         persistentVolumeClaim:
           claimName: prometheus-pvc
-      - name: config-volume
+      - name: prometheus-config
         configMap:
           name: prometheus-config

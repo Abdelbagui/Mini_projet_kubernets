@@ -2,45 +2,33 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wordpress
-  labels:
-    app: wordpress
-  namespace: wordpress
+  namespace: web-stack
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: wordpress
-      tier: frontend
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
         app: wordpress
-        tier: frontend
     spec:
       containers:
-      - image: wordpress:latest
-        name: wordpress
+      - name: wordpress
+        image: wordpress:latest
         env:
-        - name: WORDPRESS_DB_USER
-          value: abdel
-        - name: WORDPRESS_DB_NAME
-          value: wordpress
         - name: WORDPRESS_DB_HOST
           value: mysql
+        - name: WORDPRESS_DB_NAME
+          value: wordpress
+        - name: WORDPRESS_DB_USER
+          value: wp_user
         - name: WORDPRESS_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: app-wordpress-secret
-              key: wordpress_db_password
-        ports:
-        - containerPort: 80
-          name: wordpress
+          value: wp_password
         volumeMounts:
-        - name: wp-persistent-storage
-          mountPath: /var/www/html  # Mount the PVC to persist data in the container
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
       volumes:
-      - name: wp-persistent-storage
+      - name: wordpress-persistent-storage
         persistentVolumeClaim:
-          claimName: wp-pvc  # Refers to the PVC we created
+          claimName: wordpress-pvc
