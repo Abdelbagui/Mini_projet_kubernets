@@ -45,3 +45,4 @@ jobs:
           git add .
           git commit -m "Update K8S Deployment [skip ci]"
           git push https://$CICD_TOKEN@github.com/abdelbagui/Mini_projet_kubernets.git
+          ######""
