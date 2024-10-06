@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
-  namespace: web-stack
+  namespace: web-stack-1
 data:
   prometheus.yml: |
     global:

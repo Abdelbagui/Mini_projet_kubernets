@@ -1,9 +1,8 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: web-stack
+  namespace: web-stack-1
 spec:
   replicas: 1
   selector:
@@ -25,7 +24,16 @@ spec:
         env:
         - name: GF_SECURITY_ADMIN_PASSWORD
           value: admin
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "500m"     
       volumes:
       - name: grafana-storage
         persistentVolumeClaim:
           claimName: grafana-pvc
+
+         
