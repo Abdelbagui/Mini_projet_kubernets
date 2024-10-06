@@ -20,7 +20,7 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
-          docker build --platform=linux/amd64 -f ./docker/Dockerfile -t ghcr.io/abdelbagui/mini_projet_kubernets:$GITHUB_SHA ./app
+          docker build --platform=linux/amd64 nginx:latest -t ghcr.io/abdelbagui/mini_projet_kubernets:$GITHUB_SHA .
           docker push ghcr.io/abdelbagui/mini_projet_kubernets:$GITHUB_SHA
 
   deploy_k8s:
