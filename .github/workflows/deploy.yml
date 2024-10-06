@@ -20,8 +20,8 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
-          docker build --platform=linux/amd64 -f ./docker/Dockerfile -t ghcr.io/Abdelbagui/Mini_projet_kubernets:$GITHUB_SHA ./app
-          docker push ghcr.io/Abdelbagui/Mini_projet_kubernets:$GITHUB_SHA
+          docker build --platform=linux/amd64 -f ./docker/Dockerfile -t ghcr.io/abdelbagui/Mini_projet_kubernets:$GITHUB_SHA ./app
+          docker push ghcr.io/abdelbagui/Mini_projet_kubernets:$GITHUB_SHA
 
   deploy_k8s:
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
 
       - name: Prepare K8s Deployment
         run: |
-          export IMG_TAG="ghcr.io/Abdelbagui/Mini_projet_kubernets:$GITHUB_SHA"
+          export IMG_TAG="ghcr.io/abdelbagui/Mini_projet_kubernets:$GITHUB_SHA"
           envsubst < kube/templates/deployment.yaml > kube/envs/prod/deployment.yaml
 
       - name: Commit and Push changes to K8S deployment
@@ -44,4 +44,4 @@ jobs:
           git config user.email "${{ github.actor }}@users.noreply.github.com"
           git add .
           git commit -m "Update K8S Deployment [skip ci]"
-          git push https://$CICD_TOKEN@github.com/Abdelbagui/Mini_projet_kubernets.git
+          git push https://$CICD_TOKEN@github.com/abdelbagui/Mini_projet_kubernets.git
