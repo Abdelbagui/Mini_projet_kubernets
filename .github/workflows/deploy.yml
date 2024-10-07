@@ -60,21 +60,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }} # Tu devras stocker les identifiants du service principal en secret
-        subscriptionId: b8d59266-91c9-4141-a106-8ca2c5cd0155
-    - name: Get AKS credentials
-      run: |
-        az aks get-credentials --resource-group abdel_aks-resource-group --name abdel_flux
-
+    # - name: Set up Azure CLI
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }} # Tu devras stocker les identifiants du service principal en secret
+    #     subscriptionId: b8d59266-91c9-4141-a106-8ca2c5cd0155
+    # - name: Get AKS credentials
+    #   run: |
+    #     az aks get-credentials --resource-group abdel_aks-resource-group --name abdel_flux
     - name: Apply Kubernetes manifests
       run: |
          kubectl apply -f ./Back/Phpmyadmin
     - name: Apply Kubernetes manifests 1 
       run: |
          kubectl apply -f ./Back
-    - name: Apply Kubernetes manifests 1 
+    - name: Apply Kubernetes manifests 2
       run: |
         kubectl apply -f ./Front
