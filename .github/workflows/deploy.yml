@@ -64,7 +64,7 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }} # Tu devras stocker les identifiants du service principal en secret
-
+        subscriptionId: b8d59266-91c9-4141-a106-8ca2c5cd0155
     - name: Get AKS credentials
       run: |
         az aks get-credentials --resource-group abdel_aks-resource-group --name abdel_flux
