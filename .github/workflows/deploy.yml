@@ -20,7 +20,7 @@
        - name: Build and Push Docker image
          run: |
 
-           docker build  -t  nginx:latest
+           docker run   -t  nginx:latest
            docker push ghcr.io/abdelbagui/mini_projet_kubernets:$GITHUB_SHA
 
    deploy_k8s:
