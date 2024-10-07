@@ -1,79 +1,46 @@
-# name: CI/CD Pipeline
-# on:
-#   push:
-#     branches:
-#       - main
+ name: CI/CD Pipeline
+ on:
+   push:
+     branches:
+       - main
 
-# jobs:
-#   build_docker:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
+ jobs:
+   build_docker:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Checkout code
+         uses: actions/checkout@v2
 
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v1
+       - name: Set up Docker Buildx
+         uses: docker/setup-buildx-action@v1
 
-#       - name: Log in to GitHub Container Registry
-#         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+       - name: Log in to GitHub Container Registry
+         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-#       - name: Build and Push Docker image
-#         run: |
+       - name: Build and Push Docker image
+         run: |
 
-#           docker build  -t  ghcr.io/abdelbagui/mini_projet_kubernets:$GITHUB_SHA .
-#           docker push ghcr.io/abdelbagui/mini_projet_kubernets:$GITHUB_SHA
+           docker build  -t  inginx:$GITHUB_SHA .
+           docker push ghcr.io/abdelbagui/mini_projet_kubernets:$GITHUB_SHA
 
-#   deploy_k8s:
-#     runs-on: ubuntu-latest
-#     needs: build_docker
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
+   deploy_k8s:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Checkout code
+         uses: actions/checkout@v2
 
-#       - name: Install dependencies
-#         run: sudo apt-get update && sudo apt-get install -y gettext
+       - name: Install dependencies
+         run: sudo apt-get update && sudo apt-get install -y gettext
 
-#       - name: Prepare K8s Deployment
-#         run: |
-#           export IMG_TAG="ghcr.io/abdelbagui/mini_projet_kubernets:$GITHUB_SHA"
-#           envsubst < Back/grafana/deployment.yaml > deployment.yaml
-
-#       - name: Commit and Push changes to K8S deployment
-#         run: |
-#           git config user.name "${{ github.actor }}"
-#           git config user.email "${{ github.actor }}@users.noreply.github.com"
-#           git add .
-#           git commit -m "Update K8S Deployment"
-#           git push https://$CICD_TOKEN@github.com/abdelbagui/mini_projet_kubernets.git
-name: Deploy to AKS
-
-on:
-  push:
-    branches:
-      - main # Déclenche la pipeline lors des pushes sur la branche main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    # - name: Set up Azure CLI
-    #   uses: azure/login@v1
-    #   with:
-    #     creds: ${{ secrets.AZURE_CREDENTIALS }} # Tu devras stocker les identifiants du service principal en secret
-    #     subscriptionId: b8d59266-91c9-4141-a106-8ca2c5cd0155
-    # - name: Get AKS credentials
-    #   run: |
-    #     az aks get-credentials --resource-group abdel_aks-resource-group --name abdel_flux
-    - name: Apply Kubernetes manifests
-      run: |
-         kubectl apply -f ./Back/Phpmyadmin
-    - name: Apply Kubernetes manifests 1 
-      run: |
-         kubectl apply -f ./Back
-    - name: Apply Kubernetes manifests 2
-      run: |
-        kubectl apply -f ./Front
+       - name: Prepare K8s Deployment
+         run: |
+            kubecl apply -f Back 
+            kubectl apply -f front 
+       - name: Commit and Push changes to K8S deployment
+         run: |
+           git config user.name "${{ github.actor }}"
+           git config user.email "${{ github.actor }}@users.noreply.github.com"
+           git add .
+           git commit -m "Update K8S Deployment"
+           git push https://$CICD_TOKEN@github.com/abdelbagui/mini_projet_kubernets.git
+ 
