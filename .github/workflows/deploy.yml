@@ -34,7 +34,7 @@
 
        - name: Prepare K8s Deployment
          run: |
-            kubecl apply -f Back 
+            kubectl apply -f Back 
             kubectl apply -f front 
        - name: Commit and Push changes to K8S deployment
          run: |
