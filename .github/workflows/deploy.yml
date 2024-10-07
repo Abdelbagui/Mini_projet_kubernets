@@ -4,64 +4,41 @@ on:
   push:
     branches:
       - main
-     jobs:
-      deploy_k8s:
-        runs-on: ubuntu-latest
- #       needs: build_docker
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v2
-    
-          - name: Install dependencies
-            run: sudo apt-get update && sudo apt-get install -y gettext
-    
-          - name: Set up kubectl
-            uses: azure/setup-kubectl@v1
-            with:
-              version: 'latest'
-    
-          - name: Authenticate to Azure
-            uses: azure/login@v1
-            with:
-              creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-          - name: Configure Kubernetes context
-            run: |
-              az aks get-credentials --resource-group abdel_aks-resource-group  --name abdel_flux --overwrite-existing
-    
-          - name: Prepare K8s Deployment
-            run: |
-              # Appliquer les fichiers de configuration pour WordPress
-              kubectl apply -f ./Front
-              kubectl apply -f ./Back
-    
-          - name: Commit and Push changes to K8S deployment (optional)
-            run: |
-              git config user.name "${{ github.actor }}"
-              git config user.email "${{ github.actor }}@users.noreply.github.com"
-              git add .
-              git commit -m "Update K8S Deployment"
-              git push https://$CICD_TOKEN@github.com/${{ github.repository }}.git    
 
-# jobs:
-#   build_docker:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
+jobs:
+  deploy_k8s:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v1
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y gettext
 
-#       - name: Log in to GitHub Container Registry
-#         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
 
-#       - name: Build and Push Docker image for WordPress
-#         run: |
-#           docker build -t ghcr.io/${{ github.repository }}/wordpress:latest ./path-to-your-wordpress-dockerfile
-#           docker push ghcr.io/${{ github.repository }}/wordpress:latest
+      - name: Authenticate to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-#       - name: Build and Push Docker image for MySQL (if you have a custom Dockerfile)
-#         run: |
-#           docker build -t ghcr.io/${{ github.repository }}/mysql:latest ./path-to-your-mysql-dockerfile
-#           docker push ghcr.io/${{ github.repository }}/mysql:latest
+      - name: Configure Kubernetes context
+        run: |
+          az aks get-credentials --resource-group abdel_aks-resource-group --name abdel_flux --overwrite-existing
+
+      - name: Prepare K8s Deployment
+        run: |
+          # Appliquer les fichiers de configuration pour WordPress
+          kubectl apply -f ./Front
+          kubectl apply -f ./Back
+
+      - name: Commit and Push changes to K8S deployment (optional)
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add .
+          git commit -m "Update K8S Deployment"
+          git push https://$CICD_TOKEN@github.com/${{ github.repository }}.git
