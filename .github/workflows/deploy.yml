@@ -35,11 +35,10 @@ jobs:
           kubectl apply -f ./Front
           kubectl apply -f ./Back
 
-      - name: Commit and Push changes to K8S deployment (optional)
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git add .
-          git commit -m "Update K8S Deployment"
-          git push https://$CICD_TOKEN@github.com/${{ github.repository }}.git
-######################
+      # - name: Commit and Push changes to K8S deployment (optional)
+      #   run: |
+      #     git config user.name "${{ github.actor }}"
+      #     git config user.email "${{ github.actor }}@users.noreply.github.com"
+      #     git add .
+      #     git commit -m "Update K8S Deployment"
+      #     git push https://$CICD_TOKEN@github.com/${{ github.repository }}.git
