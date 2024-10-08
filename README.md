@@ -184,21 +184,12 @@ Cette configuration permet à **ArgoCD** de surveiller le dépôt GitHub et d'ap
 ---
 
 ### **8. Étape 4 : Installation de Prometheus, Grafana, et Node-Exporter**
-
-Ces outils sont déployés via **Helm**, qui gère leur installation sur le cluster AKS.
-
-#### **1. Installer Prometheus, Grafana, et Node-Exporter**
-
-Ajoutez le dépôt **Prometheus Community** et installez la stack de monitoring via Helm :
-
-```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-
-# Installer la stack de monitoring
-helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+En appliquant cette commande dans le fichier du pippeline, nous permet de créer Grafana et node-exporter et prometheus dans le cluster. 
+```	
+          kubectl apply -f ./Monitoring/Grafana
+          kubectl apply -f ./Monitoring/Prometheus
+          kubectl apply -f ./Monitoring/node-exporter  --validate=false        
 ```
-
 #### **2. Accéder à Grafana**
 
 Une fois Grafana installé, vous pouvez accéder à l'interface web de Grafana en configurant un **port-forward** :
