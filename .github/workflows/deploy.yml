@@ -27,7 +27,7 @@ jobs:
 
       - name: Configure Kubernetes context
         run: |
-          az aks get-credentials --resource-group abdel_aks-resource-group --name abdel_flux --overwrite-existing
+          az aks get-credentials --resource-group Abdel_ressource --name Abdel_cluster --overwrite-existing
 
       - name: Prepare K8s Deployment
         run: |
