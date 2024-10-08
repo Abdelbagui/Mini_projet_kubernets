@@ -1,8 +1,8 @@
-### Documentation : Automatisation du Déploiement sur AKS pour HASMATECHNOLOGIE avec GitHub Actions et ArgoCD
+### Projet : Automatisation du Déploiement sur AKS pour HASMATECHNOLOGIE avec GitHub Actions et ArgoCD
 
 #### **1. Introduction**
 
-Ce document détaille la mise en place d'une solution CI/CD pour l'entreprise **HASMA Technologies**. Le besoin spécifique est de surveiller et gérer les applications conteneurisées via un cluster **Azure Kubernetes Service (AKS)**, en assurant la disponibilité des outils de surveillance comme **Grafana**, **Prometheus**, et **Node-Exporter**. Nous utiliserons **GitHub Actions** pour automatiser les déploiements et **ArgoCD** pour la gestion continue des applications déployées via une stratégie **GitOps**.
+Ce README détaille la mise en place d'une solution CI/CD pour l'entreprise **HASMA Technologies**. Le besoin spécifique est de surveiller et gérer les applications conteneurisées via un cluster **Azure Kubernetes Service (AKS)**, en assurant la disponibilité des outils de surveillance comme **Grafana**, **Prometheus**, et **Node-Exporter**. Nous utiliserons **GitHub Actions** pour automatiser les déploiements et **ArgoCD** pour la gestion continue des applications déployées via une stratégie **GitOps**.
 
 ---
 
