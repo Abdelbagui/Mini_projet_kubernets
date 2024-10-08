@@ -35,9 +35,9 @@ jobs:
           kubectl apply -f ./Front
           kubectl apply -f ./Back/Phpmyadmin
           kubectl apply -f ./Monitoring/Grafana
-          kubectl apply -f ./Monitoring/node-exporter --validate=false
           kubectl apply -f ./Monitoring/Prometheus
-
+          kubectl apply -f ./Monitoring/node-exporter  --validate=false
+          
 
       # - name: Commit and Push changes to K8S deployment (optional)
       #   run: |
