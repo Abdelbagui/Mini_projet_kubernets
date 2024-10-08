@@ -1,283 +1,241 @@
-```markdown
-# Déploiement de WordPress et MySQL sur Minikube
+### Documentation : Automatisation du Déploiement sur AKS pour HASMATECHNOLOGIE avec GitHub Actions et ArgoCD
 
-## Description du projet
+#### **1. Introduction**
 
-Ce projet a pour objectif de déployer une instance de **WordPress** avec une base de données **MySQL** sur un cluster **Minikube** local. Les services sont exposés de manière suivante :
-- **WordPress** est accessible via un service de type **NodePort**.
-- **MySQL** est déployé avec un service de type **ClusterIP**.
+Ce document détaille la mise en place d'une solution CI/CD pour l'entreprise **HASMA Technologies**. Le besoin spécifique est de surveiller et gérer les applications conteneurisées via un cluster **Azure Kubernetes Service (AKS)**, en assurant la disponibilité des outils de surveillance comme **Grafana**, **Prometheus**, et **Node-Exporter**. Nous utiliserons **GitHub Actions** pour automatiser les déploiements et **ArgoCD** pour la gestion continue des applications déployées via une stratégie **GitOps**.
 
-Le déploiement est effectué dans un namespace dédié appelé `web-stack`. De plus, nous mettons en place un système de monitoring utilisant **Prometheus** et **Grafana**.
+---
 
-## Prérequis
+#### **2. Objectif du projet**
 
-Avant de commencer, vous devez avoir les éléments suivants installés sur votre machine :
+Le projet vise à répondre au besoin de **HASMA Technologies** pour automatiser et simplifier la surveillance de son infrastructure Kubernetes en utilisant une solution CI/CD basée sur GitHub Actions, ArgoCD, et les outils de monitoring (Grafana, Prometheus, et Node-Exporter). Tous les fichiers manifestes nécessaires pour ces outils seront versionnés dans un dépôt GitHub et appliqués automatiquement sur un cluster AKS.
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+---
 
+### **3. Architecture du Projet**
 
-## Étapes d'installation
+- **Cluster AKS** : Utilisé pour exécuter les applications conteneurisées, y compris les outils de monitoring.
+- **GitHub Actions** : CI/CD pipeline pour appliquer les fichiers manifestes Kubernetes de manière automatique lors de chaque changement dans le dépôt GitHub.
+- **ArgoCD** : Implémentation GitOps pour la gestion continue des applications à partir du dépôt GitHub.
+- **Prometheus** : Outil de surveillance pour collecter les métriques du cluster AKS.
+- **Node-Exporter** : Composant qui expose les métriques des nœuds du cluster pour Prometheus.
+- **Grafana** : Outil de visualisation des métriques collectées par Prometheus.
 
-### 1. Démarrer Minikube
+---
 
-Commencez par démarrer un cluster Minikube. Vous pouvez définir la quantité de CPU et de RAM que vous souhaitez allouer à Minikube en fonction de votre machine.
+### **4. Prérequis**
+
+Avant de commencer, vous devez avoir :
+1. Un compte **Azure** avec les autorisations nécessaires pour gérer des ressources AKS.
+2. Un dépôt **GitHub** pour stocker les fichiers manifestes Kubernetes.
+3. **Azure CLI**, **Kubectl**, et **Helm** installés localement pour interagir avec le cluster AKS.
+4. **GitHub Actions** activé dans le dépôt GitHub.
+5. **ArgoCD**, **Prometheus**, **Grafana**, et **Node-Exporter** installés sur le cluster AKS.
+
+---
+
+### **5. Étape 1 : Création du Cluster AKS**
+
+#### **1. Créer un groupe de ressources**
 
 ```bash
-minikube start --cpus=4 --memory=8192
+az group create --name HASMAResourceGroup --location eastus
 ```
 
-### 2. Créer le namespace `web-stack`
-
-Créez un namespace dédié pour isoler le déploiement de WordPress et MySQL.
+#### **2. Créer un cluster AKS**
 
 ```bash
-kubectl create namespace web-stack
+az aks create --resource-group HASMAResourceGroup --name HASMACluster --node-count 3 --enable-addons monitoring --generate-ssh-keys
 ```
 
-### 3. Déployer MySQL
+#### **3. Configurer `kubectl` pour accéder au cluster AKS**
 
-Créez un fichier YAML pour le déploiement de MySQL (par exemple `mysql-deployment.yaml`), contenant le service **ClusterIP** et un **PersistentVolumeClaim** pour stocker les données.
+```bash
+az aks get-credentials --resource-group HASMAResourceGroup --name HASMACluster
+kubectl get nodes
+```
+
+---
+
+### **6. Étape 2 : Mise en place de GitHub Actions pour CI/CD**
+
+Nous utiliserons **GitHub Actions** pour automatiser le déploiement des fichiers manifestes (Prometheus, Grafana, Node-Exporter).
+
+#### **1. Générer un principal de service et `AZURE_CREDENTIALS`**
+
+Créez un principal de service pour permettre à GitHub Actions d'accéder au cluster AKS et gérez les ressources :
+
+```bash
+az ad sp create-for-rbac --name "HASMAGithubActionSP" --role contributor --scopes /subscriptions/<subscription-id> --sdk-auth
+```
+
+Ajoutez ensuite les informations générées dans un secret GitHub appelé `AZURE_CREDENTIALS` :
+
+```json
+{
+  "clientId": "<azure-client-id>",
+  "clientSecret": "<azure-client-secret>",
+  "subscriptionId": "<azure-subscription-id>",
+  "tenantId": "<azure-tenant-id>",
+  "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+  "resourceManagerEndpointUrl": "https://management.azure.com/"
+}
+```
+
+#### **2. Configuration du fichier GitHub Actions**
+
+Créez le fichier `.github/workflows/deploy.yml` pour automatiser le déploiement des manifestes sur AKS :
 
 ```yaml
-apiVersion: apps/v1
-kind: Deployment
+name: CI/CD Pipeline for HASMATECHNOLOGIE
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_k8s:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y gettext
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+
+      - name: Authenticate to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Configure Kubernetes context
+        run: |
+          az aks get-credentials --resource-group Abdel_ressource --name Abdel_cluster --overwrite-existing
+
+      - name: Prepare K8s Deployment
+        run: |
+          # Appliquer les fichiers de configuration pour WordPress
+          kubectl apply -f ./Front
+          kubectl apply -f ./Back/Phpmyadmin
+          kubectl apply -f ./Monitoring/Grafana
+          kubectl apply -f ./Monitoring/Prometheus
+          kubectl apply -f ./Monitoring/node-exporter  --validate=false
+          
+
+
+### **7. Étape 3 : Installation et Configuration d'ArgoCD**
+
+**ArgoCD** sera utilisé pour synchroniser les déploiements Kubernetes à partir du dépôt GitHub.
+
+#### **1. Installation d'ArgoCD**
+
+Créez un namespace et installez ArgoCD :
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+#### **2. Accéder à ArgoCD**
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Accédez à l'interface **https://localhost:8080**. Récupérez le mot de passe initial :
+
+```bash
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
+```
+
+#### **3. Configurer l'application ArgoCD**
+
+Créez une application dans ArgoCD pour surveiller le dépôt GitHub :
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
-  name: mysql
-  namespace: web-stack
+  name: hasma-monitoring
+  namespace: argocd
 spec:
-  selector:
-    matchLabels:
-      app: mysql
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      containers:
-      - image: mysql:5.7
-        name: mysql
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: mysql-root-password
-        - name: MYSQL_DATABASE
-          value: "wordpress"
-        ports:
-        - containerPort: 3306
-          name: mysql
-        volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql
-      volumes:
-      - name: mysql-persistent-storage
-        persistentVolumeClaim:
-          claimName: mysql-pv-claim
+  project: default
+  source:
+    repoURL: 'https://github.com/HASMA-Technologies/monitoring-stack.git'
+    targetRevision: main
+    path: k8s
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
 ```
 
-Appliquez ce fichier :
+Cette configuration permet à **ArgoCD** de surveiller le dépôt GitHub et d'appliquer automatiquement les mises à jour du cluster AKS.
+
+---
+
+### **8. Étape 4 : Installation de Prometheus, Grafana, et Node-Exporter**
+
+Ces outils sont déployés via **Helm**, qui gère leur installation sur le cluster AKS.
+
+#### **1. Installer Prometheus, Grafana, et Node-Exporter**
+
+Ajoutez le dépôt **Prometheus Community** et installez la stack de monitoring via Helm :
 
 ```bash
-kubectl apply -f mysql-deployment.yaml
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+# Installer la stack de monitoring
+helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
 ```
 
-### 4. Déployer WordPress
+#### **2. Accéder à Grafana**
 
-Créez un fichier YAML pour le déploiement de WordPress (par exemple `wordpress-deployment.yaml`), exposé via un service **NodePort**.
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: wordpress
-  namespace: web-stack
-spec:
-  selector:
-    matchLabels:
-      app: wordpress
-  template:
-    metadata:
-      labels:
-        app: wordpress
-    spec:
-      containers:
-      - image: wordpress:4.8-apache
-        name: wordpress
-        env:
-        - name: WORDPRESS_DB_HOST
-          value: mysql.web-stack.svc.cluster.local:3306
-        - name: WORDPRESS_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: mysql-root-password
-        ports:
-        - containerPort: 80
-        volumeMounts:
-        - name: wordpress-persistent-storage
-          mountPath: /var/www/html
-      volumes:
-      - name: wordpress-persistent-storage
-        persistentVolumeClaim:
-          claimName: wordpress-pv-claim
-```
-
-Appliquez ce fichier :
+Une fois Grafana installé, vous pouvez accéder à l'interface web de Grafana en configurant un **port-forward** :
 
 ```bash
-kubectl apply -f wordpress-deployment.yaml
+kubectl port-forward svc/prometheus-grafana 3000:80 -n monitoring
 ```
 
-### 5. Déployer Prometheus et Grafana
+Accédez ensuite à **http://localhost:3000** dans votre navigateur. Les identifiants par défaut sont :
+- **Username** : `admin`
+- **Password** : `prom-operator`
 
-Pour surveiller votre application, vous allez déployer **Prometheus** et **Grafana**. Créez les fichiers suivants :
+#### **3. Configurer les Dashboards Grafana**
 
-#### Prometheus Deployment
+Grafana est préconfiguré pour se connecter à Prometheus et afficher des dashboards avec les métriques collectées. Vous pouvez importer ou créer des dashboards pour visualiser les performances et la santé des nœuds et des pods.
 
-Créez un fichier YAML pour le déploiement de Prometheus (par exemple `prometheus-deployment.yaml`).
+---
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: prometheus
-  namespace: web-stack
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: prometheus
-  template:
-    metadata:
-      labels:
-        app: prometheus
-    spec:
-      containers:
-      - name: prometheus
-        image: prom/prometheus:latest
-        ports:
-        - containerPort: 9090
-        volumeMounts:
-        - name: prometheus-config
-          mountPath: /etc/prometheus/
-        - name: prometheus-data
-          mountPath: /prometheus
-        args:
-          - '--config.file=/etc/prometheus/prometheus.yml'
-      volumes:
-      - name: prometheus-data
-        persistentVolumeClaim:
-          claimName: prometheus-pvc
-      - name: prometheus-config
-        configMap:
-          name: prometheus-config
-```
+### **9. Étape 5 : Surveillance et Validation**
 
-Créez également un `ConfigMap` pour la configuration de Prometheus (par exemple `prometheus-config.yaml`).
+#### **1. Vérifier les métriques Prometheus**
 
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prometheus-config
-  namespace: web-stack
-data:
-  prometheus.yml: |
-    global:
-      scrape_interval: 15s
-    scrape_configs:
-      - job_name: 'node-exporter'
-        static_configs:
-          - targets: ['node-exporter.web-stack.svc.cluster.local:9100']
-```
-
-Appliquez les fichiers :
+Assurez-vous que **Prometheus** collecte correctement les métriques du cluster en accédant à l'interface de Prometheus :
 
 ```bash
-kubectl apply -f prometheus-config.yaml
-kubectl apply -f prometheus-deployment.yaml
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n monitoring
 ```
 
-#### Grafana Deployment
+Accédez à **http://localhost:9090** et interrogez les métriques exposées.
 
-Créez un fichier YAML pour le déploiement de Grafana (par exemple `grafana-deployment.yaml`).
+#### **2. Accéder à Grafana pour visualiser les métriques**
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: grafana
-  namespace: web-stack
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: grafana
-  template:
-    metadata:
-      labels:
-        app: grafana
-    spec:
-      containers:
-      - name: grafana
-        image: grafana/grafana:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: GF_SECURITY_ADMIN_PASSWORD
-          value: "admin"
-        volumeMounts:
-        - name: grafana-storage
-          mountPath: /var/lib/grafana
-      volumes:
-      - name: grafana-storage
-        persistentVolumeClaim:
-          claimName: grafana-pvc
-```
+Assurez-vous que **Grafana** affiche correctement les dashboards avec les métriques collectées par Prometheus et exposées par **Node-Exporter**. Utilisez les dashboards fournis ou créez-en de nouveaux en fonction des besoins spécifiques de l'infrastructure de **HASMA Technologies**.
 
-Appliquez ce fichier :
+---
 
-```bash
-kubectl apply -f grafana-deployment.yaml
-```
+### **10. Conclusion**
 
-### 6. Accéder à WordPress
-
-Une fois le service déployé, récupérez l'URL du service WordPress en exécutant la commande suivante :
-
-```bash
-minikube service wordpress -n web-stack
-```
-
-Cela ouvrira automatiquement votre navigateur avec l'URL pour accéder à WordPress.
-
-### 7. Accéder à Grafana et Prometheus
-
-Pour accéder à Grafana et Prometheus, utilisez les commandes suivantes :
-
-- Pour Grafana :
-
-```bash
-minikube service grafana -n web-stack
-```
-
-- Pour Prometheus :
-
-```bash
-minikube service prometheus -n web-stack
-```
-
-### 8. Vérification
-
-Vous pouvez vérifier que les Pods et les services sont bien déployés en exécutant les commandes suivantes :
-
-```bash
-kubectl get pods -n web-stack
-kubectl get svc -n web-stack
-```
-
+Le projet d'intégration continue et de déploiement continu (CI/CD) mis en place pour
