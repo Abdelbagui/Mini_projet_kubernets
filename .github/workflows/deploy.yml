@@ -33,7 +33,11 @@ jobs:
         run: |
           # Appliquer les fichiers de configuration pour WordPress
           kubectl apply -f ./Front
-          kubectl apply -f ./Back
+          kubectl apply -f ./Back/phpmyadmin
+          kubectl apply -f ./Monitoring/Grafana
+          kubectl apply -f ./Monitoring/node-exporter
+          kubectl apply -f ./Monitoring/Prometheus
+
 
       # - name: Commit and Push changes to K8S deployment (optional)
       #   run: |
