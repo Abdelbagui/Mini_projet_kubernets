@@ -126,10 +126,9 @@ jobs:
           kubectl apply -f ./Back/Phpmyadmin
           kubectl apply -f ./Monitoring/Grafana
           kubectl apply -f ./Monitoring/Prometheus
-          kubectl apply -f ./Monitoring/node-exporter  --validate=false
- ```        
-
+          kubectl apply -f ./Monitoring/node-exporter  --validate=false        
 ```
+
 ### **7. Étape 3 : Installation et Configuration d'ArgoCD**
 
 **ArgoCD** sera utilisé pour synchroniser les déploiements Kubernetes à partir du dépôt GitHub.
