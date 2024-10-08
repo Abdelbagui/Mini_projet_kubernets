@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: grafana-pvc
-  namespace: web-stack-1
+  namespace: web-stack
 spec:
   accessModes:
     - ReadWriteOnce

@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
-  namespace: web-stack-1
+  namespace: web-stack
 spec:
   ports:
     - port: 9090

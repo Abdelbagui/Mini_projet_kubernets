@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: web-stack-1
+  namespace: web-stack
 spec:
   replicas: 1
   selector:
