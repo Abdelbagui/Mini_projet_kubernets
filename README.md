@@ -129,7 +129,7 @@ jobs:
           kubectl apply -f ./Monitoring/node-exporter  --validate=false
  ```        
 
-
+```
 ### **7. Étape 3 : Installation et Configuration d'ArgoCD**
 
 **ArgoCD** sera utilisé pour synchroniser les déploiements Kubernetes à partir du dépôt GitHub.
