@@ -127,7 +127,7 @@ jobs:
           kubectl apply -f ./Monitoring/Grafana
           kubectl apply -f ./Monitoring/Prometheus
           kubectl apply -f ./Monitoring/node-exporter  --validate=false
-          
+ ```        
 
 
 ### **7. Étape 3 : Installation et Configuration d'ArgoCD**
