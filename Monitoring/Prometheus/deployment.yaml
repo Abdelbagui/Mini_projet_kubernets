@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,6 +13,8 @@ spec:
       labels:
         app: prometheus
     spec:
+      securityContext:
+        fsGroup: 65534  # UID/GID pour les permissions
       containers:
       - name: prometheus
         image: prom/prometheus:latest
@@ -23,14 +24,14 @@ spec:
         - '--config.file=/etc/prometheus/prometheus.yml'
         volumeMounts:
         - name: prometheus-storage
-          mountPath: /prometheus
+          mountPath: /prometheus  # Pour stocker les données de Prometheus
         - name: prometheus-config
-          mountPath: /etc/prometheus/prometheus.yml
-          subPath: prometheus.yml
+          mountPath: /etc/prometheus/prometheus.yml  # Fichier de config
+          subPath: prometheus.yml  # Utilise le fichier spécifique du ConfigMap
       volumes:
       - name: prometheus-storage
         persistentVolumeClaim:
-          claimName: prometheus-pvc
+          claimName: prometheus-pvc  # PVC défini précédemment
       - name: prometheus-config
         configMap:
-          name: prometheus-config
+          name: prometheus-config  # Utilise le ConfigMap créé ci-dessus

@@ -4,15 +4,40 @@ metadata:
   name: prometheus-config
   namespace: web-stack
 data:
-  prometheus.yaml: |
+  prometheus.yml: |
     global:
-      scrape_interval: 15s
+      scrape_interval: 15s  # Fréquence de scrapping par défaut
+      evaluation_interval: 15s  # Fréquence d'évaluation des règles
+
     scrape_configs:
-      - job_name: 'node-exporter'
+      - job_name: 'node-exporter'  # Nom du job
         kubernetes_sd_configs:
-          - role: endpoints
+          - role: endpoints  # Rôle à scraper dans Kubernetes
         relabel_configs:
           - action: keep
-            regex: 'node-exporter'
+            regex: 'node-exporter'  # Garder seulement les endpoints avec cette étiquette
             source_labels:
-              - '__meta_kubernetes_service_label_app'
+              - '__meta_kubernetes_service_label_app'  # Étiquette source à utiliser pour la correspondance
+
+      - job_name: 'kubernetes-pods'  # Pour scrapper les pods Kubernetes
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace]
+            action: keep
+            regex: default  # Ne garder que les pods dans le namespace "default" (ajuste selon tes besoins)
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: instance
+            regex: (.+)
+            replacement: $1
+
+      - job_name: 'kubernetes-nodes'  # Pour scrapper les nœuds Kubernetes
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_node_name]
+            action: replace
+            target_label: instance
+            regex: (.+)
+            replacement: $1
