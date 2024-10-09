@@ -33,6 +33,7 @@ jobs:
         run: |
           # Appliquer les fichiers de configuration pour WordPress
           kubectl apply -f ./Front
+          kubectl apply -f ./Back
           kubectl apply -f ./Back/Phpmyadmin
           kubectl apply -f ./Monitoring/Grafana
           kubectl apply -f ./Monitoring/Prometheus
