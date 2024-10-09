@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Variables
-RESOURCE_GROUP_NAME="ryad-k8s-wordpress"
-CLUSTER_NAME="ryadK8sWordpressCluster"
+RESOURCE_GROUP_NAME=""
+CLUSTER_NAME=""
 
 # Suppression du cluster AKS
 echo "Suppression du cluster AKS : $CLUSTER_NAME"
