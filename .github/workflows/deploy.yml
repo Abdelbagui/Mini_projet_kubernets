@@ -38,11 +38,3 @@ jobs:
           kubectl apply -f ./Monitoring/Prometheus
           kubectl apply -f ./Monitoring/node-exporter  --validate=false
           
-
-      # - name: Commit and Push changes to K8S deployment (optional)
-      #   run: |
-      #     git config user.name "${{ github.actor }}"
-      #     git config user.email "${{ github.actor }}@users.noreply.github.com"
-      #   
-      #     git commit -m "Update K8S Deployment"
-      #     git push https://$CICD_TOKEN@github.com/${{ github.repository }}.git
