@@ -13,6 +13,8 @@ spec:
       labels:
         app: grafana
     spec:
+      securityContext:
+        fsGroup: 472  # Groupe utilisé par Grafana pour les fichiers montés
       containers:
       - name: grafana
         image: grafana/grafana:latest
@@ -35,5 +37,3 @@ spec:
       - name: grafana-storage
         persistentVolumeClaim:
           claimName: grafana-pvc
-
-         
